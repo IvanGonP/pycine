@@ -6,8 +6,27 @@ def color_pipeline(raw, setup, bpp=12):
     """Order from:
     http://www.visionresearch.com/phantomzone/viewtopic.php?f=20&t=572#p3884
     """
+    # print("fFlare: ", setup.fFlare)
+    # print("cmCalib", cmCalib)
+    # print("ccm: ", ccm)
+    # print("ccm2", ccm2)
+    # print("fOffset: ", setup.fOffset)
+    # print("fGain: ", setup.fGain)
+    # print("fGainR, fGainG, fGainB: ", setup.fGainR, setup.fGainG, setup.fGainB)
+    # print("fGamma, fGammaR, fGammaB: ", setup.fGamma, setup.fGammaR, setup.fGammaB)
+    # print(setup.ToneLabel, setup.TonePoints, fTone)
+    # print("fPedestalR, fPedestalG, fPedestalB: ",
+    # print("fChroma: ", setup.fChroma)
+    # print("fHue: ", setup.fHue)
+    # print("WBGain: ", np.asarray(setup.WBGain))
+    # print("WBView: ", np.asarray(setup.WBView))
+    # print("fWBTemp: ", setup.fWBTemp)
+    # print("fWBCc: ", setup.fWBCc)
+    # print("cmCalib: ", cmCalib)
+    # print("whitebalance: ", whitebalance)
+
     # 1. Offset the raw image by the amount in flare
-    print("fFlare: ", setup.fFlare)
+    # print("fFlare: ", setup.fFlare)
 
     # 2. White balance the raw picture using the white balance component of cmatrix
     BayerPatterns = {3: "gbrg", 4: "rggb"}
@@ -42,9 +61,9 @@ def color_pipeline(raw, setup, bpp=12):
     ccm2[1][1] = 1 - ccm2[1][0] - ccm2[1][2]
     ccm2[2][2] = 1 - ccm2[2][0] - ccm2[2][1]
 
-    print("cmCalib", cmCalib)
-    print("ccm: ", ccm)
-    print("ccm2", ccm2)
+    # print("cmCalib", cmCalib)
+    # print("ccm: ", ccm)
+    # print("ccm2", ccm2)
 
     m = np.asarray(
         [
@@ -69,32 +88,33 @@ def color_pipeline(raw, setup, bpp=12):
     # rgb_image = np.dot(rgb_image, cmUser.T)
 
     # 6. Offset the image by the amount in offset
-    print("fOffset: ", setup.fOffset)
+    # print("fOffset: ", setup.fOffset)
 
     # 7. Apply the global gain
-    print("fGain: ", setup.fGain)
+    # print("fGain: ", setup.fGain)
 
     # 8. Apply the per-component gains red, green, blue
-    print("fGainR, fGainG, fGainB: ", setup.fGainR, setup.fGainG, setup.fGainB)
+    # print("fGainR, fGainG, fGainB: ", setup.fGainR, setup.fGainG, setup.fGainB)
 
     # 9. Apply the gamma curves; the green channel uses gamma, red uses gamma + rgamma and blue uses gamma + bgamma
-    print("fGamma, fGammaR, fGammaB: ", setup.fGamma, setup.fGammaR, setup.fGammaB)
+    # print("fGamma, fGammaR, fGammaB: ", setup.fGamma, setup.fGammaR, setup.fGammaB)
     rgb_image = apply_gamma(rgb_image, setup)
 
     # 10. Apply the tone curve to each of the red, green, blue channels
     fTone = np.asarray(setup.fTone)
-    print(setup.ToneLabel, setup.TonePoints, fTone)
+    # print(setup.ToneLabel, setup.TonePoints, fTone)
 
     # 11. Add the pedestals to each color channel, and linearly rescale to keep the white point the same.
-    print("fPedestalR, fPedestalG, fPedestalB: ", setup.fPedestalR, setup.fPedestalG, setup.fPedestalB)
+    # print("fPedestalR, fPedestalG, fPedestalB: ",
+          setup.fPedestalR, setup.fPedestalG, setup.fPedestalB)
 
     # 12. Convert to YCrCb using REC709 coefficients
 
     # 13. Scale the Cr and Cb components by chroma.
-    print("fChroma: ", setup.fChroma)
+    # print("fChroma: ", setup.fChroma)
 
     # 14. Rotate the Cr and Cb components around the origin in the CrCb plane by hue degrees.
-    print("fHue: ", setup.fHue)
+    # print("fHue: ", setup.fHue)
 
     return rgb_image
 
@@ -103,35 +123,35 @@ def gen_mask(pattern, c, image):
     def color_kern(pattern, c):
         return np.array([[pattern[0] != c, pattern[1] != c], [pattern[2] != c, pattern[3] != c]])
 
-    (h, w) = image.shape[:2]
-    cells = np.ones((h // 2, w // 2))
+    (h, w)=image.shape[:2]
+    cells=np.ones((h // 2, w // 2))
 
     return np.kron(cells, color_kern(pattern, c))
 
 
 def whitebalance_raw(raw, setup, pattern):
-    cmCalib = np.asarray(setup.cmCalib).reshape(3, 3)
-    whitebalance = np.diag(cmCalib)
-    whitebalance = [1.193739671606806, 1.0, 1.7885392465247287]
+    cmCalib=np.asarray(setup.cmCalib).reshape(3, 3)
+    whitebalance=np.diag(cmCalib)
+    whitebalance=[1.193739671606806, 1.0, 1.7885392465247287]
 
-    print("WBGain: ", np.asarray(setup.WBGain))
-    print("WBView: ", np.asarray(setup.WBView))
-    print("fWBTemp: ", setup.fWBTemp)
-    print("fWBCc: ", setup.fWBCc)
-    print("cmCalib: ", cmCalib)
-    print("whitebalance: ", whitebalance)
+    # print("WBGain: ", np.asarray(setup.WBGain))
+    # print("WBView: ", np.asarray(setup.WBView))
+    # print("fWBTemp: ", setup.fWBTemp)
+    # print("fWBCc: ", setup.fWBCc)
+    # print("cmCalib: ", cmCalib)
+    # print("whitebalance: ", whitebalance)
 
     # FIXME: maybe use .copy()
-    wb_raw = np.ma.MaskedArray(raw)
+    wb_raw=np.ma.MaskedArray(raw)
 
-    wb_raw.mask = gen_mask(pattern, "r", wb_raw)
+    wb_raw.mask=gen_mask(pattern, "r", wb_raw)
     wb_raw *= whitebalance[0]
-    wb_raw.mask = gen_mask(pattern, "g", wb_raw)
+    wb_raw.mask=gen_mask(pattern, "g", wb_raw)
     wb_raw *= whitebalance[1]
-    wb_raw.mask = gen_mask(pattern, "b", wb_raw)
+    wb_raw.mask=gen_mask(pattern, "b", wb_raw)
     wb_raw *= whitebalance[2]
 
-    wb_raw.mask = np.ma.nomask
+    wb_raw.mask=np.ma.nomask
 
     return wb_raw
 
@@ -148,8 +168,8 @@ def apply_gamma(rgb_image, setup):
 
 
 def resize(rgb_image, new_width):
-    height, width = rgb_image.shape[:2]
-    new_height = int(new_width * (float(height) / width))
-    res = cv2.resize(rgb_image, (new_width, new_height))
+    height, width=rgb_image.shape[:2]
+    new_height=int(new_width * (float(height) / width))
+    res=cv2.resize(rgb_image, (new_width, new_height))
 
     return res
