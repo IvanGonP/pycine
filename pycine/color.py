@@ -15,7 +15,7 @@ def color_pipeline(raw, setup, bpp=12):
     # print("fGainR, fGainG, fGainB: ", setup.fGainR, setup.fGainG, setup.fGainB)
     # print("fGamma, fGammaR, fGammaB: ", setup.fGamma, setup.fGammaR, setup.fGammaB)
     # print(setup.ToneLabel, setup.TonePoints, fTone)
-    # print("fPedestalR, fPedestalG, fPedestalB: ",
+    # print("fPedestalR, fPedestalG, fPedestalB: ",setup.fPedestalR, setup.fPedestalG, setup.fPedestalB)
     # print("fChroma: ", setup.fChroma)
     # print("fHue: ", setup.fHue)
     # print("WBGain: ", np.asarray(setup.WBGain))
@@ -105,8 +105,7 @@ def color_pipeline(raw, setup, bpp=12):
     # print(setup.ToneLabel, setup.TonePoints, fTone)
 
     # 11. Add the pedestals to each color channel, and linearly rescale to keep the white point the same.
-    # print("fPedestalR, fPedestalG, fPedestalB: ",
-          setup.fPedestalR, setup.fPedestalG, setup.fPedestalB)
+    # print("fPedestalR, fPedestalG, fPedestalB: ",setup.fPedestalR, setup.fPedestalG, setup.fPedestalB)
 
     # 12. Convert to YCrCb using REC709 coefficients
 
@@ -123,16 +122,16 @@ def gen_mask(pattern, c, image):
     def color_kern(pattern, c):
         return np.array([[pattern[0] != c, pattern[1] != c], [pattern[2] != c, pattern[3] != c]])
 
-    (h, w)=image.shape[:2]
-    cells=np.ones((h // 2, w // 2))
+    (h, w) = image.shape[:2]
+    cells = np.ones((h // 2, w // 2))
 
     return np.kron(cells, color_kern(pattern, c))
 
 
 def whitebalance_raw(raw, setup, pattern):
-    cmCalib=np.asarray(setup.cmCalib).reshape(3, 3)
-    whitebalance=np.diag(cmCalib)
-    whitebalance=[1.193739671606806, 1.0, 1.7885392465247287]
+    cmCalib = np.asarray(setup.cmCalib).reshape(3, 3)
+    whitebalance = np.diag(cmCalib)
+    whitebalance = [1.193739671606806, 1.0, 1.7885392465247287]
 
     # print("WBGain: ", np.asarray(setup.WBGain))
     # print("WBView: ", np.asarray(setup.WBView))
@@ -142,16 +141,16 @@ def whitebalance_raw(raw, setup, pattern):
     # print("whitebalance: ", whitebalance)
 
     # FIXME: maybe use .copy()
-    wb_raw=np.ma.MaskedArray(raw)
+    wb_raw = np.ma.MaskedArray(raw)
 
-    wb_raw.mask=gen_mask(pattern, "r", wb_raw)
+    wb_raw.mask = gen_mask(pattern, "r", wb_raw)
     wb_raw *= whitebalance[0]
-    wb_raw.mask=gen_mask(pattern, "g", wb_raw)
+    wb_raw.mask = gen_mask(pattern, "g", wb_raw)
     wb_raw *= whitebalance[1]
-    wb_raw.mask=gen_mask(pattern, "b", wb_raw)
+    wb_raw.mask = gen_mask(pattern, "b", wb_raw)
     wb_raw *= whitebalance[2]
 
-    wb_raw.mask=np.ma.nomask
+    wb_raw.mask = np.ma.nomask
 
     return wb_raw
 
@@ -168,8 +167,8 @@ def apply_gamma(rgb_image, setup):
 
 
 def resize(rgb_image, new_width):
-    height, width=rgb_image.shape[:2]
-    new_height=int(new_width * (float(height) / width))
-    res=cv2.resize(rgb_image, (new_width, new_height))
+    height, width = rgb_image.shape[:2]
+    new_height = int(new_width * (float(height) / width))
+    res = cv2.resize(rgb_image, (new_width, new_height))
 
     return res
